@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seoul Travel Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #0e0e0e;
+    --paper: #f2ede6;
+    --red: #b83a2a;
+    --gold: #c9a84c;
+    --muted: #7a7060;
+    --border: rgba(255,255,255,0.08);
+  }
+  body { background: var(--bg); color: var(--paper); font-family: 'DM Mono', monospace; font-size: 13px; line-height: 1.7; min-height: 100vh; }
+
+  .hero { position: relative; padding: 80px 60px 60px; border-bottom: 1px solid var(--border); overflow: hidden; }
+  .hero::before { content: '서울'; position: absolute; right: -40px; top: 50%; transform: translateY(-50%); font-family: 'Cormorant Garamond', serif; font-size: 260px; font-weight: 700; color: rgba(255,255,255,0.03); line-height: 1; pointer-events: none; }
+  .hero-tag { font-size: 10px; letter-spacing: 4px; text-transform: uppercase; color: var(--gold); margin-bottom: 20px; }
+  .hero h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(52px, 8vw, 100px); font-weight: 300; line-height: 0.95; letter-spacing: -2px; color: var(--paper); }
+  .hero h1 em { font-style: italic; color: var(--gold); }
+  .hero-sub { margin-top: 28px; font-size: 11px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; }
+
+  .nav { display: flex; border-bottom: 1px solid var(--border); overflow-x: auto; scrollbar-width: none; position: sticky; top: 0; background: #0e0e0e; z-index: 100; }
+  .nav::-webkit-scrollbar { display: none; }
+  .nav-btn { flex-shrink: 0; padding: 18px 28px; background: none; border: none; border-right: 1px solid var(--border); color: var(--muted); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: all 0.2s; position: relative; }
+  .nav-btn::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: var(--gold); transform: scaleX(0); transition: transform 0.2s; }
+  .nav-btn:hover { color: var(--paper); }
+  .nav-btn.active { color: var(--paper); }
+  .nav-btn.active::after { transform: scaleX(1); }
+
+  .content { display: none; animation: fadeUp 0.35s ease; }
+  .content.active { display: block; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+  .intro-band { padding: 40px 60px; border-bottom: 1px solid var(--border); display: grid; grid-template-columns: 120px 1fr; gap: 40px; align-items: start; }
+  .intro-number { font-family: 'Cormorant Garamond', serif; font-size: 96px; font-weight: 300; color: rgba(255,255,255,0.06); line-height: 1; letter-spacing: -4px; }
+  .intro-label { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; }
+  .intro-title { font-family: 'Cormorant Garamond', serif; font-size: 36px; font-weight: 400; line-height: 1.1; color: var(--paper); margin-bottom: 16px; }
+  .intro-desc { color: var(--muted); font-size: 12px; max-width: 580px; line-height: 1.8; }
+
+  .stops-section { padding: 0 60px; }
+  .section-header { padding: 32px 0 16px; font-size: 9px; letter-spacing: 4px; text-transform: uppercase; color: var(--red); border-bottom: 1px solid var(--border); }
+  .stop { display: grid; grid-template-columns: 100px 1fr; border-bottom: 1px solid var(--border); }
+  .stop-time { padding: 30px 20px 28px 0; font-size: 10px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; border-right: 1px solid var(--border); }
+  .stop-body { padding: 28px 0 28px 28px; }
+  .stop-name { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 600; color: var(--paper); margin-bottom: 10px; line-height: 1.2; }
+  .stop-desc { color: #9a9080; font-size: 12px; line-height: 1.8; margin-bottom: 14px; max-width: 600px; }
+  .stop-meta { display: flex; gap: 20px; flex-wrap: wrap; align-items: center; }
+  .meta-item { font-size: 10px; color: var(--muted); }
+  .meta-item span { color: #b0a898; }
+  .map-link { font-size: 10px; color: var(--gold); text-decoration: none; letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid rgba(201,168,76,0.3); padding-bottom: 1px; transition: border-color 0.2s; }
+  .map-link:hover { border-color: var(--gold); }
+
+  .nearby-section { padding: 32px 60px 60px; }
+  .nearby-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border: 1px solid var(--border); margin-top: 16px; }
+  .nearby-item { background: #161614; padding: 24px 28px; transition: background 0.2s; }
+  .nearby-item:hover { background: #1c1c19; }
+  .nearby-name { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 600; color: var(--paper); margin-bottom: 6px; }
+  .nearby-desc { font-size: 11px; color: var(--muted); line-height: 1.7; }
+  .nearby-link { display: inline-block; margin-top: 10px; font-size: 10px; color: var(--gold); text-decoration: none; letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid rgba(201,168,76,0.3); }
+  .nearby-link:hover { border-color: var(--gold); }
+
+  .other-section { padding: 40px 60px 80px; }
+  .rec-item { padding: 32px 0; border-bottom: 1px solid var(--border); }
+  .rec-tag { font-size: 9px; letter-spacing: 3px; text-transform: uppercase; color: var(--red); margin-bottom: 10px; }
+  .rec-name { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 600; color: var(--paper); margin-bottom: 12px; line-height: 1.1; }
+  .rec-desc { font-size: 11px; color: var(--muted); line-height: 1.8; margin-bottom: 16px; max-width: 640px; }
+  .rec-links { display: flex; flex-direction: column; gap: 6px; }
+  .rec-link { font-size: 10px; color: var(--gold); text-decoration: none; letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid rgba(201,168,76,0.3); width: fit-content; }
+  .rec-link:hover { border-color: var(--gold); }
+
+  @media (max-width: 640px) {
+    .hero { padding: 48px 24px 40px; }
+    .hero::before { font-size: 140px; right: -20px; }
+    .intro-band { padding: 28px 24px; grid-template-columns: 1fr; gap: 8px; }
+    .intro-number { display: none; }
+    .intro-title { font-size: 26px; }
+    .stops-section { padding: 0 24px; }
+    .stop { grid-template-columns: 64px 1fr; }
+    .stop-body { padding-left: 14px; }
+    .nearby-section { padding: 24px 24px 40px; }
+    .nearby-grid { grid-template-columns: 1fr; }
+    .other-section { padding: 24px 24px 60px; }
+    .nav-btn { padding: 16px 18px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-tag">A local's guide</div>
+  <h1>Seoul,<br><em>done right.</em></h1>
+  <p class="hero-sub">3 example itineraries + other recommendations</p>
+</div>
+
+<nav class="nav">
+  <button class="nav-btn active" onclick="show('it1', this)">Itinerary 01 — Old Seoul</button>
+  <button class="nav-btn" onclick="show('it2', this)">Itinerary 02 — Han River South</button>
+  <button class="nav-btn" onclick="show('it3', this)">Itinerary 03 — Myeongdong · Namsan · Itaewon</button>
+  <button class="nav-btn" onclick="show('other', this)">Other Recommendations</button>
+</nav>
+
+<!-- ITINERARY 1 -->
+<div class="content active" id="it1">
+  <div class="intro-band">
+    <div class="intro-number">01</div>
+    <div class="intro-right">
+      <div class="intro-label">Itinerary One</div>
+      <div class="intro-title">Old Seoul</div>
+      <div class="intro-desc">Seoul has two sides. South of Han River is modern and new. North of Han River is where the history is — old palaces, traditional markets, and remnants of the city wall.</div>
+    </div>
+  </div>
+  <div class="stops-section">
+    <div class="section-header">Main Route</div>
+    <div class="stop">
+      <div class="stop-time">10 AM</div>
+      <div class="stop-body">
+        <div class="stop-name">Gyeongbokgung Palace</div>
+        <div class="stop-desc">A large ancient palace in the center of the city, built in the 1300s. If you rent a hanbok (traditional Korean garment) nearby, entry is free — so you'll see a lot of people dressed up. Worth a couple of hours.</div>
+        <div class="stop-meta">
+          <div class="meta-item">🚇 <span>Subway or taxi</span></div>
+          <a class="map-link" href="https://www.google.com/maps/search/?api=1&query=Gyeongbokgung+Palace+Seoul" target="_blank">↗ Google Maps</a>
+        </div>
+      </div>
+    </div>
+    <div class="stop">
+      <div class="stop-time">Noon</div>
+      <div class="stop-body">
+        <div class="stop-name">Insadong-gil</div>
+        <div class="stop-desc">A street near the palace with souvenir shops and small restaurants. Good place to pick up gifts. Walkable from Gyeongbokgung.</div>
+        <div class="stop-meta">
+          <div class="meta-item">🚶 <span>Walking from Gyeongbokgung</span></div>
+          <a class="map-link" href="https://www.google.com/maps/search/?api=1&query=Insadong-gil+Seoul" target="_blank">↗ Google Maps</a>
+        </div>
+      </div>
+    </div>
+    <div class="stop">
+      <div class="stop-time">2 PM</div>
+      <div class="stop-body">
+        <div class="stop-name">Gwangjang Market</div>
+        <div class="stop-desc">One of Seoul's oldest traditional markets. Busy and full of street food stalls. Good spot for a late lunch — bindaetteok (mung bean pancake) and mayak gimbap are the things to get here.</div>
+        <div class="stop-meta">
+          <div class="meta-item">🚶 <span>~25 min walk or subway</span></div>
+          <a class="map-link" href="https://www.google.com/maps/search/?api=1&query=Gwangjang+Market+Seoul" target="_blank">↗ Google Maps</a>
+        </div>
+      </div>
+    </div>
+    <div class="stop">
+      <div class="stop-time">4 PM</div>
+      <div class="stop-body">
+        <div class="stop-name">Cheonggye-cheon Waterway</div>
+        <div class="stop-desc">A stream running through old Seoul, converted into a walking path. A pleasant way to walk between spots and decompress after the market.</div>
+        <div class="stop-meta">
+          <div class="meta-item">🚶 <span>Right next to the market</span></div>
+          <a class="map-link" href="https://www.google.com/maps/search/?api=1&query=Cheonggyecheon+Stream+Seoul" target="_blank">↗ Google Maps</a>
+        </div>
+      </div>
+    </div>
+    <div class="stop">
+      <div class="stop-time">5 PM</div>
+      <div class="stop-body">
+        <div class="stop-name">Dongdaemun Fortress — Sunset Walk</div>
+        <div class="stop-desc">Parts of Seoul's old fortress wall have been restored into a trail. "Dongdaemun" means the East Gate — one of the four original entrances to the old city. Walk up the hill for a view of the city at sunset. Small pubs at the top.</div>
+        <div class="stop-meta">
+          <div class="meta-item">🚶 <span>Walk along the waterway or Uber</span></div>
+          <a class="map-link" href="https://www.google.com/maps/search/?api=1&query=Dongdaemun+Seoul+City+Wall" target="_blank">↗ Google Maps</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="nearby-section">
+    <div class="section-header">Nearby — If You Have Time</div>
+    <div class="nearby-grid">
+      <div class="nearby-item">
+        <div class="nearby-name">Euljiro (을지로)</div>
+        <div class="nearby-desc">Old industrial printing district that's become a bar area. Unpretentious, local crowd, cheap beer.</div>
+        <a class="nearby-link" href="https://www.google.com/maps/search/?api=1&query=Euljiro+Seoul" target="_blank">↗ Google Maps</a>
+      </div>
+      <div class="nearby-item">
+        <div class="nearby-name">Ikseondong (익선동)</div>
+        <div class="nearby-desc">Small alley of hanok buildings turned into cafes and shops. 10-min walk from Insadong.</div>
+        <a class="nearby-link" href="https://www.google.com/maps/search/?api=1&query=Ikseon-dong+Seoul" target="_blank">↗ Google Maps</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ITINERARY 2 -->
+<div class="content" id="it2">
+  <div class="intro-band">
+    <div class="intro-number">02</div>
+    <div class="intro-right">
+      <div class="intro-label">Itinerary Two</div>
+      <div class="intro-title">Han River South</div>
+      <div class="intro-desc">A Buddhist temple next to skyscrapers, a massive underground mall, and instant ramyeon by the river.</div>
+    </div>
+  </div>
+  <div class="stops-section">
+    <div class="section-header">Main Route</div>
+    <div class="stop">
+      <div class="stop-time">10 AM</div>
+      <div class="stop-body">
+        <div class="stop-name">Bongeunsa Temple (봉은사)</div>
+        <div class="stop-desc">A Buddhist temple that's been here since the 9th century, now surrounded by Gangnam skyscrapers. The contrast is striking. Quiet inside, free to enter.</div>
+        <div class="stop-meta">
+          <div class="meta-item">🚇 <span>Subway to Samseong station</span></div>
+          <a class="map-link" href="https://www.google.com/maps/search/?api=1&query=Bongeunsa+Temple+Seoul" target="_blank">↗ Google Maps</a>
+        </div>
+      </div>
+    </div>
+    <div class="stop">
+      <div class="stop-time">Noon</div>
+      <div class="stop-body">
+        <div class="stop-name">COEX Mall & Starfield Library</div>
+        <div class="stop-desc">One of the largest underground malls in Asia. The Starfield Library inside is worth seeing — a large open atrium lined floor-to-ceiling with bookshelves. Plenty of places to eat lunch here.</div>
+        <div class="stop-meta">
+          <div class="meta-item">🚶 <span>5-min walk from Bongeunsa</span></div>
+          <a class="map-link" href="https://www.google.com/maps/search/?api=1&query=COEX+Mall+Seoul" target="_blank">↗ Google Maps</a>
+        </div>
+      </div>
+    </div>
+    <div class="stop">
+      <div class="stop-time">4 PM</div>
+      <div class="stop-body">
+        <div class="stop-name">Banpo Han River Park — Ramyeon</div>
+        <div class="stop-desc">Buy instant ramyeon from a GS25 or CU convenience store at the park — they have hot water dispensers and will give you chopsticks. Sit by the water. Simple but one of those experiences that's very specific to Seoul.</div>
+        <div class="stop-meta">
+          <div class="meta-item">🚇 <span>Subway to Express Bus Terminal, then short walk</span></div>
+          <a class="map-link" href="https://www.google.com/maps/search/?api=1&query=Banpo+Han+River+Park+Seoul" target="_blank">↗ Google Maps</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="nearby-section">
+    <div class="section-header">Nearby — If You Have Time</div>
+    <div class="nearby-grid">
+      <div class="nearby-item">
+        <div class="nearby-name">Dosan Park Area (도산공원)</div>
+        <div class="nearby-desc">Tree-lined streets, good independent restaurants and cafes. A quieter, more local side of Gangnam.</div>
+        <a class="nearby-link" href="https://www.google.com/maps/search/?api=1&query=Dosan+Park+Seoul" target="_blank">↗ Google Maps</a>
+      </div>
+      <div class="nearby-item">
+        <div class="nearby-name">Seongsu-dong (성수동)</div>
+        <div class="nearby-desc">Former factory district turned café and concept store neighborhood. Popular on weekends.</div>
+        <a class="nearby-link" href="https://www.google.com/maps/search/?api=1&query=Seongsu-dong+Seoul" target="_blank">↗ Google Maps</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ITINERARY 3 -->
+<div class="content" id="it3">
+  <div class="intro-band">
+    <div class="intro-number">03</div>
+    <div class="intro-right">
+      <div class="intro-label">Itinerary Three</div>
+      <div class="intro-title">Myeongdong · Namsan · Itaewon</div>
+      <div class="intro-desc">A big museum in the morning, street food in Myeongdong, up to the tower in the middle of the city, then down into the most international neighborhood for dinner.</div>
+    </div>
+  </div>
+  <div class="stops-section">
+    <div class="section-header">Main Route</div>
+    <div class="stop">
+      <div class="stop-time">10 AM</div>
+      <div class="stop-body">
+        <div class="stop-name">National Museum of Korea</div>
+        <div class="stop-desc">Free entry, one of the largest museums in the world. Covers Korean history from prehistoric times through the Joseon dynasty. Don't try to see everything — the gold crowns, celadon pottery, and Buddhist sculpture hall are the highlights. Plan for about 2 hours.</div>
+        <div class="stop-meta">
+          <div class="meta-item">🚇 <span>Subway to Ichon station</span></div>
+          <div class="meta-item">💰 <span>Free entry</span></div>
+          <a class="map-link" href="https://www.google.com/maps/search/?api=1&query=National+Museum+of+Korea+Seoul" target="_blank">↗ Google Maps</a>
+        </div>
+      </div>
+    </div>
+    <div class="stop">
+      <div class="stop-time">1 PM</div>
+      <div class="stop-body">
+        <div class="stop-name">Myeongdong</div>
+        <div class="stop-desc">Seoul's most well-known shopping and street food district. It's touristy but the street food is good — try the egg bread (계란빵), skewers, and hotteok. A good spot for lunch before heading up to Namsan.</div>
+        <div class="stop-meta">
+          <div class="meta-item">🚇 <span>Subway to Myeongdong station</span></div>
+          <a class="map-link" href="https://www.google.com/maps/search/?api=1&query=Myeongdong+Seoul" target="_blank">↗ Google Maps</a>
+        </div>
+      </div>
+    </div>
+    <div class="stop">
+      <div class="stop-time">3 PM</div>
+      <div class="stop-body">
+        <div class="stop-name">Namsan Tower</div>
+        <div class="stop-desc">A tower on a small mountain in the middle of Seoul. Take the cable car up from Myeongdong or hike (about 20 minutes). The observation deck has a full view of the city. Better in the late afternoon when the light is good.</div>
+        <div class="stop-meta">
+          <div class="meta-item">🚡 <span>Cable car from Myeongdong</span></div>
+          <a class="map-link" href="https://www.google.com/maps/search/?api=1&query=N+Seoul+Tower+Namsan" target="_blank">↗ Google Maps</a>
+        </div>
+      </div>
+    </div>
+    <div class="stop">
+      <div class="stop-time">6 PM</div>
+      <div class="stop-body">
+        <div class="stop-name">Itaewon — Dinner & Nightlife</div>
+        <div class="stop-desc">Come down from Namsan into Itaewon for dinner. Seoul's most international neighborhood — more variety of food here than anywhere else in the city. Middle Eastern, Mexican, South Asian, and more. Also one of the better areas in Seoul for nightlife if you want to stay out.</div>
+        <div class="stop-meta">
+          <div class="meta-item">🚶 <span>Short walk or taxi down from Namsan</span></div>
+          <a class="map-link" href="https://www.google.com/maps/search/?api=1&query=Itaewon+Seoul" target="_blank">↗ Google Maps</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="nearby-section">
+    <div class="section-header">Nearby — If You Have Time</div>
+    <div class="nearby-grid">
+      <div class="nearby-item">
+        <div class="nearby-name">Haebangchon (해방촌)</div>
+        <div class="nearby-desc">Hillside neighborhood just above Itaewon. Quieter, more local feel. Good cafes and small bars.</div>
+        <a class="nearby-link" href="https://www.google.com/maps/search/?api=1&query=Haebangchon+Seoul" target="_blank">↗ Google Maps</a>
+      </div>
+      <div class="nearby-item">
+        <div class="nearby-name">Gyeongnidan-gil (경리단길)</div>
+        <div class="nearby-desc">Restaurant street between Itaewon and Namsan. Compact and walkable, good food options.</div>
+        <a class="nearby-link" href="https://www.google.com/maps/search/?api=1&query=Gyeongnidan-gil+Seoul" target="_blank">↗ Google Maps</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- OTHER RECOMMENDATIONS -->
+<div class="content" id="other">
+  <div class="intro-band">
+    <div class="intro-number" style="font-size:60px;color:rgba(255,255,255,0.04)">etc</div>
+    <div class="intro-right">
+      <div class="intro-label">Beyond the Itineraries</div>
+      <div class="intro-title">Other Recommendations</div>
+      <div class="intro-desc">Standalone spots, nature, and a few ideas for when you want to get out of the city.</div>
+    </div>
+  </div>
+  <div class="other-section">
+    <div class="section-header">Worth Knowing About</div>
+    <div class="rec-item">
+      <div class="rec-tag">Landmark</div>
+      <div class="rec-name">Lotte World Tower</div>
+      <div class="rec-desc">The tallest building in Korea. The observation deck on the 117th floor (Seoul Sky) has views that stretch far beyond the city on a clear day. Worth going if you want a different perspective from Namsan. There's a mall and an amusement park attached if you want to make a full day of it.</div>
+      <div class="rec-links">
+        <div class="meta-item" style="margin-bottom:6px">🚇 <span>Subway to Jamsil station</span></div>
+        <a class="rec-link" href="https://www.google.com/maps/search/?api=1&query=Lotte+World+Tower+Seoul" target="_blank">↗ Google Maps</a>
+      </div>
+    </div>
+    <div class="rec-item">
+      <div class="rec-tag">Traditional</div>
+      <div class="rec-name">Bukchon Hanok Village</div>
+      <div class="rec-desc">A residential neighborhood of traditional hanok houses on a hillside between two palaces. Most of old Seoul was demolished during modernization, so this is one of the few areas where the original architecture survived. It's a real neighborhood, so keep noise down.</div>
+      <div class="rec-links">
+        <div class="meta-item" style="margin-bottom:6px">🚇 <span>Subway to Anguk station</span></div>
+        <a class="rec-link" href="https://www.google.com/maps/search/?api=1&query=Bukchon+Hanok+Village+Seoul" target="_blank">↗ Google Maps</a>
+      </div>
+    </div>
+    <div class="rec-item">
+      <div class="rec-tag">Nature</div>
+      <div class="rec-name">Bukhansan & Inwangsan</div>
+      <div class="rec-desc">Seoul has proper mountains on its edge, both accessible by subway. Bukhansan is the bigger hike — granite peaks, 2 to 3 hours. Inwangsan is shorter and easier, about an hour up, passing along part of the old city wall with good views. Both are free.</div>
+      <div class="rec-links">
+        <div class="meta-item" style="margin-bottom:6px">🚇 <span>Bukhansan: Gupabal or Ui station · Inwangsan: Dongnimmun station</span></div>
+        <a class="rec-link" href="https://www.google.com/maps/search/?api=1&query=Bukhansan+National+Park+Seoul" target="_blank">↗ Bukhansan — Google Maps</a>
+        <a class="rec-link" href="https://www.google.com/maps/search/?api=1&query=Inwangsan+Seoul" target="_blank">↗ Inwangsan — Google Maps</a>
+      </div>
+    </div>
+    <div class="rec-item">
+      <div class="rec-tag">Day Trip</div>
+      <div class="rec-name">Busan</div>
+      <div class="rec-desc">If you have a spare day and want to get out of Seoul, Busan is worth it. Korea's second largest city on the southern coast — beaches, seafood markets, a completely different pace. The KTX from Seoul Station gets you there in about 2.5 hours. Doable as a long day trip, more comfortable as an overnight.</div>
+      <div class="rec-links">
+        <div class="meta-item" style="margin-bottom:6px">🚄 <span>KTX from Seoul Station (~2.5 hrs)</span></div>
+        <a class="rec-link" href="https://www.google.com/maps/search/?api=1&query=Busan+South+Korea" target="_blank">↗ Google Maps</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function show(id, btn) {
+    document.querySelectorAll('.content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    btn.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+</body>
+</html>
